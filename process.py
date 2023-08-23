@@ -94,9 +94,9 @@ class imagenYfrase(object):
   def __init__(self, imagen1):
     self.imagen1 = imagen1
 
-  def imagen(self):
+  def imagen(self, text):
      W, H = (800,800)
-     texto = "es como hacer que una gota de lluvia que cae en todo"
+     texto = text
      # get an image
      with Image.open(self.imagen1).convert("RGBA") as base:
         # make a blank image for the text, initialized to transparent text color
@@ -113,6 +113,28 @@ class imagenYfrase(object):
 
         out = Image.alpha_composite(base, txt)
         out.show()
+
+
+  def texto(self, text):
+     if len(text) > 52:
+        for i in range(52, 0, -1):
+           if text[i] == " ":
+                 if (53 - len(text[0:i])) > 1:
+                     n = (53 - int(len(text[0:i])))
+                     resultado = (int(n * 0.8) * " ") + text[0:i] + "\n"
+                     text = text[i+1:len(text)]
+                     break
+        return resultado + self.texto(text)
+     else:
+        if (52 - len(text)) > 1:
+                 n = int(52 - len(text))
+                 text = (int(n*0.8) * " ") + text
+                 return text
+           
+              
+        
+     
+    
 
  
 
