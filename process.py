@@ -1,95 +1,14 @@
 from PIL import Image, ImageDraw, ImageFont
-import random, requests, json
+from oauth2client.client import flow_from_clientsecrets
+from oauth2client.file import Storage
+from oauth2client.tools import run_flow
+import random, json, requests, httplib2, os, time
 
-
-""" class publicacion(object):
-  def __init__(self, model, color, company, speed_limit):
-    self.color = color
-    self.company = company
-    self.speed_limit = speed_limit
-    self.model = model
-
-  def start(self):
-    print("started")
-
-  def stop(self):
-    print("stopped")
-
-  def accelarate(self):
-    print("accelarating...")
-    "accelarator functionality here"
-
-  def change_gear(self, gear_type):
-    print("gear changed")
-    " gear related functionality here"
+ig_user_id = 17841460287206000
+access_token2 = "EAAJqZAFveq7YBO0CWewsilzEldEVUN75O7pcDSPIZBK7R8yuwtihWZBzYEm6QA78n45UXFqsmUyZBPeymzPQEZA0ZA9T78cKGx90jDZClZBespSvRlCnAWAe45E7cNOmZCYXTMzDvuZBY33AS6yPYZBgIu2fKsAlTZCOczaIouZCoRy0W2XxokiPy1Mdi1B4FFl5p05iIYLJvAhx3z6RpC6mVixieAf6scv5R2kEZD"
 
 
 
-
-
-def publicar():
-            with open("data.pickle", "rb") as f:
-                data = pickle.load(f)
-            while True:
-                with open("semana.pickle", "rb") as f:
-                    lista = pickle.load(f)
-                numero = random.randrange(0, len(data) + 1, 1)
-                if numero in lista:
-                    self.label4.configure(
-                        text="La frase ya ha sido usada... escogiendo otra"
-                    )
-                else:
-                    lista.append(numero)
-                    self.label4.configure(
-                        text="Frases ya publicadas: %s" % (str(lista))
-                    )
-                    with open("semana.pickle", "wb") as f:
-                        pickle.dump(lista, f, pickle.HIGHEST_PROTOCOL)
-                    break
-            with open("key.pickle", "rb") as f:
-                access_token = pickle.load(f)
-            ig_user_id = "17841455189847505"
-            image_url = data[numero][1]
-            numeroDeFrase = random.randrange(1, 102, 1)
-            frase = requests.get(
-                "https://api-generator.retool.com/zMQmrc/frases/%s" % (numeroDeFrase)
-            )
-            frase = frase.json()
-            caption = (
-                frase["frase"]
-                + "\nHaz tus pedidos por DM 🛒🔥\nMás estilos en nuestra tienda online\n.\n.\nContamos con envío a domicilio a todo El Salvador 🇸🇻\n📩Pedidos por DM\n🛒 o en nuestra tienda online (link en BIO)\n#elsalvador #crazysocks #tiendaenlinea #watushop #sivar #mysocks #mystyle"
-            )
-            post_url = "https://graph.facebook.com/v17.0/%s/media" % (ig_user_id)
-            param = dict()
-            param["access_token"] = access_token
-            param["caption"] = caption
-            param["image_url"] = image_url
-            response = requests.post(post_url, params=param)
-            response = response.json()
-
-            if "id" in response:
-                creation_id = response["id"]
-                second_url = "https://graph.facebook.com/v17.0/%s/media_publish" % (
-                    ig_user_id
-                )
-                second_param = dict()
-                second_param = {
-                    "access_token": access_token,
-                    "creation_id": creation_id,
-                }
-                response = requests.post(second_url, params=second_param)
-                response = response.json()
-                t = time.localtime()
-                current_time = time.strftime("%H:%M:%S", t)
-                self.label4.configure(text="Imagen publicada! %s" % (str(current_time)))
-            else:
-                t = time.localtime()
-                current_time = time.strftime("%H:%M:%S", t)
-                self.label4.configure(
-                    text="Error: No fue posible publicar %s" % (str(current_time))
-                )
-
-"""
 class imagenYfrase(object):
   def __init__(self, imagen1):
     self.imagen1 = imagen1
@@ -126,8 +45,7 @@ class imagenYfrase(object):
         out = Image.alpha_composite(base, txt)
         
         out2 = out.convert('RGB')
-        out2.save("frase.jpg")
-        #out.save("img1.png","PNG")
+        out2.save("foto/frase.jpg")
 
 
   def texto(self, text):
@@ -167,6 +85,128 @@ class imagenYfrase(object):
                 frase = json.load(openfile)
       numero = random.randrange(0, len(frase), 1)
       return frase[numero]
+  
+
+
+  def publicar(self,image_url, caption):
+            post_url = "https://graph.facebook.com/v17.0/%s/media" % (ig_user_id)
+            param = dict()
+            param["access_token"] = access_token2
+            param["caption"] = caption
+            param["image_url"] = image_url
+            response = requests.post(post_url, params=param)
+            response = response.json()
+
+            if "id" in response:
+                creation_id = response["id"]
+                second_url = "https://graph.facebook.com/v17.0/%s/media_publish" % (
+                    ig_user_id
+                )
+                second_param = dict()
+                second_param = {
+                    "access_token": access_token2,
+                    "creation_id": creation_id,
+                }
+                response = requests.post(second_url, params=second_param)
+                response = response.json()
+                t = time.localtime()
+                current_time = time.strftime("%H:%M:%S", t)
+                self.label4.configure(text="Imagen publicada! %s" % (str(current_time)))
+            else:
+                t = time.localtime()
+                current_time = time.strftime("%H:%M:%S", t)
+                self.label4.configure(
+                    text="Error: No fue posible publicar %s" % (str(current_time))
+                )
+  
+
+
+    # Start the OAuth flow to retrieve credentials
+  def authorize_credentials(self):
+        CLIENT_SECRET = 'client_secret.json'
+        SCOPE = 'https://www.googleapis.com/auth/photoslibrary'
+        STORAGE = Storage('credentials.storage')
+        # Fetch credentials from storage
+        credentials = STORAGE.get()
+        # If the credentials doesn't exist in the storage location then run the flow
+        if credentials is None or credentials.invalid:
+            flow = flow_from_clientsecrets(CLIENT_SECRET, scope=SCOPE)
+            http = httplib2.Http()
+            credentials = run_flow(flow, STORAGE, http=http)
+        return credentials
+
+  def get_access_token(self):
+        credentials = self.authorize_credentials()
+        access_token = credentials.access_token
+        return access_token
+
+  def getPhotoUrl(self, access_token, photo_id):
+        # Set the headers for the request
+        headers = {
+            "Authorization": "Bearer " + access_token,
+            "Content-type": "application/json"
+        }
+
+        # Set the URL for the request
+        url = "https://photoslibrary.googleapis.com/v1/mediaItems/" + photo_id
+
+        # Send the GET request
+        response = requests.get(url, headers=headers)
+
+        # Parse the response as JSON
+        response_json = response.json()
+
+        # Get the URL of the photo from the response
+        photo_url = response_json["baseUrl"]
+        return photo_url
+
+  def uploadPhoto(self, caption):
+        access_token = self.get_access_token()
+        # Set up the request headers
+        headers = {
+            'Authorization': 'Bearer %s' % access_token,
+            'Content-type': 'application/octet-stream',
+            'X-Goog-Upload-Content-Type': 'image/jpeg',
+            'X-Goog-Upload-Protocol': 'raw'
+        }
+
+        image_path = 'foto/frase.jpg'
+        # Read the binary data from file
+        with open(image_path, 'rb') as f:
+            image_data = f.read()
+
+        # Send the POST request to get the upload token
+        response = requests.post('https://photoslibrary.googleapis.com/v1/uploads',
+                                headers=headers, data=image_data)
+
+        # Check if the request was successful and get the upload token
+        if response.status_code == requests.codes.ok:
+            upload_token = response.text
+            headers = {
+                'Authorization': 'Bearer %s' % access_token,
+                'Content-type': 'application/json'
+            }
+            payload = {
+                "newMediaItems": [
+                        {
+                            "simpleMediaItem": {
+                                "fileName": os.path.basename(image_path),
+                                "uploadToken": upload_token
+                            }
+                        }
+                    ]
+                }
+            # Send the POST request to get the upload token
+            response = requests.post('https://photoslibrary.googleapis.com/v1/mediaItems:batchCreate',
+                                    headers=headers, json=payload)   
+            json_response = response.json()
+            photo_id = json_response['newMediaItemResults'][0]['mediaItem']['id']
+            #If you want to get public url for anyone can see 
+            photo_url = self.getPhotoUrl(access_token, photo_id)
+            print("mediaItems full response = ",json_response,'\n\n\n',"public url = ", photo_url)
+            self.publicar(photo_url,caption)
+        else:
+            response.raise_for_status()
       
         
            
@@ -175,7 +215,9 @@ class imagenYfrase(object):
      
     
 
- 
+
+
+
 
 
 
