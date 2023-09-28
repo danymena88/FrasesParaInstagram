@@ -2,7 +2,18 @@ from process import imagenYfrase
 from apscheduler.schedulers.background import BackgroundScheduler
 from PIL import Image
 from pystray import MenuItem as item
-import customtkinter, pickle, os, pystray
+import customtkinter, pickle, os, pystray, requests, time, json
+
+try:
+      with open('apis.json', encoding='utf-8') as openfile:
+                # Reading from json file
+                apis = json.load(openfile)
+except:
+      print("Error: Falta el archivo apis.json")
+
+ig_user_id = apis[0]
+access_token2 = apis[1]
+
 
 with open("theme.pickle", "rb") as file:
             theme = pickle.load(file)
@@ -10,6 +21,7 @@ customtkinter.set_appearance_mode(theme)  # Modes: "System" (standard), "Dark", 
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 current_path = os.path.dirname(os.path.realpath(__file__))
                         
+
 
 class App(customtkinter.CTk):
     def __init__(self):
@@ -355,11 +367,46 @@ class App(customtkinter.CTk):
         customtkinter.set_appearance_mode(new_appearance_mode)
         with open("theme.pickle", "wb") as file:
             pickle.dump(new_appearance_mode, file, pickle.HIGHEST_PROTOCOL)
+     
+    def publicar(self,image_url, caption):
+            post_url = "https://graph.facebook.com/v17.0/%s/media" % (ig_user_id)
+            param = dict()
+            param["access_token"] = access_token2
+            param["caption"] = caption
+            param["image_url"] = image_url
+            response = requests.post(post_url, params=param)
+            response = response.json()
+
+            if "id" in response:
+                creation_id = response["id"]
+                second_url = "https://graph.facebook.com/v17.0/%s/media_publish" % (
+                    ig_user_id
+                )
+                second_param = dict()
+                second_param = {
+                    "access_token": access_token2,
+                    "creation_id": creation_id,
+                }
+                response = requests.post(second_url, params=second_param)
+                response = response.json()
+                t = time.localtime()
+                current_time = time.strftime("%H:%M:%S", t)
+                print("Imagen publicada! %s" % (str(current_time)))
+            else:
+                t = time.localtime()
+                current_time = time.strftime("%H:%M:%S", t)
+                print("Error: No fue posible publicar %s" % (str(current_time)))
 
     def publicacion(self):
-        imagen1 = imagenYfrase("plantilla.png")
-        imagen1.imagen(imagen1.texto(imagen1.obtenerFrase()))
-        imagen1.uploadPhoto(self.textbox.get("0.0","end"))
+        try:
+              imagen1 = imagenYfrase("plantilla.png")
+              imagen1.imagen(imagen1.texto(imagen1.obtenerFrase()))
+        except:
+              print("Error: Problema al abrir plantilla.png")
+        try:
+              self.publicar(imagen1.uploadPhoto(),self.textbox.get("0.0","end"))
+        except:
+              print("Error: Problema con la conexion o api key de imgbb")
 
     def guardar(self):          
         if self.switch.get() == "on":
