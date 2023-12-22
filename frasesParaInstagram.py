@@ -4,6 +4,7 @@ from PIL import Image
 from pystray import MenuItem as item
 import customtkinter, pickle, os, pystray, requests, time, json
 
+
 try:
       with open('apis.json', encoding='utf-8') as openfile:
                 # Reading from json file
@@ -161,7 +162,7 @@ class App(customtkinter.CTk):
              with open("tareas.pickle", "rb") as file:
                   self.listaTareas = pickle.load(file)
         except:
-             print("")
+             print("Falta el archivo tareas.pickle")
           # tareas programadas
         self.scheduler = BackgroundScheduler()
         self.scheduler.start()
@@ -232,11 +233,14 @@ class App(customtkinter.CTk):
         self.scheduler.print_jobs()
 
     def obtenerSwitches(self):
-         with open("switches.pickle", "rb") as file:
-            self.switches = pickle.load(file)
-         self.switch1 = self.switches[0]
-         self.switch2 = self.switches[1]
-         self.switch3 = self.switches[2]
+         try:
+               with open("switches.pickle", "rb") as file:
+                     self.switches = pickle.load(file)
+               self.switch1 = self.switches[0]
+               self.switch2 = self.switches[1]
+               self.switch3 = self.switches[2]
+         except:
+               print("No se encontro el archivo switches.pickle")
     
     def guardarSwitches(self):
          with open("switches.pickle", "wb") as file:

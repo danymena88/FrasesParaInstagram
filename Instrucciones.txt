@@ -1,0 +1,5 @@
+Apis.json
+
+El primer espacio es para el número de Instagram User ID
+El segundo espacio es para el token de Instagram
+y el tercer espacio es para el IMGBB Token
