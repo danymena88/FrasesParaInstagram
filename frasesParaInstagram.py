@@ -497,7 +497,7 @@ class App(customtkinter.CTk):
 
     def creadoPor(self):
           import webbrowser
-          webbrowser.open("https://github.com/danymena88")
+          webbrowser.open("https://instagram.com/danielmena.foto")
              
     
     # Define a function for quit the window
